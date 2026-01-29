@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接水果遊戲 - 簡化版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FF);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        h1 {
+            color: #FF6B6B;
+            font-size: 3rem;
+            text-shadow: 3px 3px 0 #FFD166;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #5D4037;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 800px;
+            max-width: 95vw;
+            height: 600px;
+            max-height: 70vh;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border: 10px solid #5D4037;
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background-color: #E8F5E9;
+        }
+        
+        .game-ui {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            max-width: 95vw;
+            margin-top: 20px;
+            padding: 15px 25px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-container, .lives-container, .level-container {
+            text-align: center;
+        }
+        
+        .game-ui h3 {
+            color: #5D4037;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .score-value, .level-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FF6B6B;
+        }
+        
+        .lives-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .level-value {
+            color: #2196F3;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            width: 800px;
+            max-width: 95vw;
+            text-align: center;
+        }
+        
+        .controls h3 {
+            color: #5D4037;
+            margin-bottom: 10px;
+        }
+        
+        .controls p {
+            color: #5D4037;
+            margin-bottom: 10px;
+        }
+        
+        .control-keys {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .key {
+            background-color: #FFD166;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #5D4037;
+            box-shadow: 0 3px 0 #FFB300;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        #startBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #pauseBtn {
+            background-color: #FFB300;
+            color: white;
+        }
+        
+        #resetBtn {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            width: 800px;
+            max-width: 95vw;
+        }
+        
+        .instructions h3 {
+            color: #5D4037;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            color: #5D4037;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .fruit-types {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .fruit-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fruit-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .apple { background-color: #FF5252; }
+        .banana { background-color: #FFD740; }
+        .orange { background-color: #FF9800; }
+        .watermelon { background-color: #4CAF50; }
+        .bomb { background-color: #424242; }
+        
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 10px;
+        }
+        
+        .game-over h2 {
+            color: #FFD166;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+        }
+        
+        .game-over p {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+        }
+        
+        .game-over button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+        }
+        
+        .life-icons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .life-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .life-icon.lost {
+            background-color: #F44336;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .game-container {
+                height: 500px;
+            }
+            
+            .game-ui {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .score-value, .lives-value, .level-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .game-container {
+                height: 400px;
+            }
+            
+            .fruit-types {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>接水果遊戲</h1>
+        <p class="subtitle">生命只有三次，碰到炸彈扣一個生命！</p>
+    </header>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-over" id="gameOverScreen">
+            <h2>遊戲結束!</h2>
+            <p>得分: <span id="finalScore">0</span></p>
+            <button id="restartBtn">再玩一次</button>
+        </div>
+    </div>
+    
+    <div class="game-ui">
+        <div class="score-container">
+            <h3>分數</h3>
+            <div class="score-value" id="score">0</div>
+        </div>
+        <div class="lives-container">
+            <h3>生命</h3>
+            <div class="lives-value" id="lives">3</div>
+            <div class="life-icons" id="lifeIcons">
+                <div class="life-icon">❤</div>
+                <div class="life-icon">❤</div>
+                <div class="life-icon">❤</div>
+            </div>
+        </div>
+        <div class="level-container">
+            <h3>關卡</h3>
+            <div class="level-value" id="level">1</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <h3>遊戲控制</h3>
+        <p>使用滑鼠移動籃子 或 使用左右方向鍵控制</p>
+        <div class="control-keys">
+            <div class="key">← 左移</div>
+            <div class="key">→ 右移</div>
+        </div>
+        
+        <div class="buttons">
+            <button id="startBtn">開始遊戲</button>
+            <button id="pauseBtn">暫停</button>
+            <button id="resetBtn">重新開始</button>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>遊戲說明</h3>
+        <ul>
+            <li>移動籃子接住從天而降的水果，獲得高分</li>
+            <li>不同水果有不同的分數：蘋果(10分)、香蕉(15分)、橙子(20分)、西瓜(25分)</li>
+            <li>只有碰到炸彈才會扣生命，水果落地不會扣生命</li>
+            <li>生命只有三次機會，每碰一次炸彈扣一個生命</li>
+            <li>三個生命都用完時遊戲結束</li>
+            <li>每獲得100分進入下一關，水果下落速度會增加</li>
+        </ul>
+        
+        <div class="fruit-types">
+            <div class="fruit-item">
+                <div class="fruit-icon apple"></div>
+                <span>蘋果: 10分</span>
+            </div>
+            <div class="fruit-item">
+                <div class="fruit-icon banana"></div>
+                <span>香蕉: 15分</span>
+            </div>
+            <div class="fruit-item">
+                <div class="fruit-icon orange"></div>
+                <span>橙子: 20分</span>
+            </div>
+            <div class="fruit-item">
+                <div class="fruit-icon watermelon"></div>
+                <span>西瓜: 25分</span>
+            </div>
+            <div class="fruit-item">
+                <div class="fruit-icon bomb">💣</div>
+                <span>炸彈: 扣1生命</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 獲取Canvas元素和上下文
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 設置Canvas尺寸
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        
+        // 遊戲變數
+        let score = 0;
+        let lives = 3; // 只有三次生命
+        let level = 1;
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameLoop;
+        
+        // 籃子屬性
+        const basket = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 80,
+            width: 100,
+            height: 60,
+            speed: 10,
+            color: '#FF9800',
+            movingLeft: false,
+            movingRight: false
+        };
+        
+        // 水果類型 - 簡化版本，只有四種水果和炸彈
+        const fruitTypes = [
+            { name: 'apple', color: '#FF5252', score: 10, radius: 20 },
+            { name: 'banana', color: '#FFD740', score: 15, radius: 22 },
+            { name: 'orange', color: '#FF9800', score: 20, radius: 25 },
+            { name: 'watermelon', color: '#4CAF50', score: 25, radius: 28 },
+            { name: 'bomb', color: '#424242', score: 0, radius: 23, isBomb: true }
+        ];
+        
+        // 水果陣列
+        let fruits = [];
+        
+        // 初始化遊戲
+        function initGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            fruits = [];
+            basket.x = canvas.width / 2 - 50;
+            
+            updateUI();
+            updateLifeIcons();
+            
+            // 隱藏遊戲結束畫面
+            document.getElementById('gameOverScreen').style.display = 'none';
+            
+            // 繪製初始畫面
+            draw();
+        }
+        
+        // 更新生命圖標
+        function updateLifeIcons() {
+            const lifeIcons = document.getElementById('lifeIcons');
+            lifeIcons.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                const lifeIcon = document.createElement('div');
+                lifeIcon.className = i < lives ? 'life-icon' : 'life-icon lost';
+                lifeIcon.textContent = '❤';
+                lifeIcons.appendChild(lifeIcon);
+            }
+        }
+        
+        // 繪製籃子
+        function drawBasket() {
+            // 籃子主體
+            ctx.fillStyle = basket.color;
+            ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+            
+            // 籃子邊緣
+            ctx.fillStyle = '#5D4037';
+            ctx.fillRect(basket.x, basket.y, basket.width, 10);
+            ctx.fillRect(basket.x, basket.y + basket.height - 10, basket.width, 10);
+            
+            // 籃子內部線條
+            ctx.strokeStyle = '#8D6E63';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(basket.x + 10, basket.y + 10);
+            ctx.lineTo(basket.x + basket.width - 10, basket.y + 10);
+            ctx.moveTo(basket.x + 10, basket.y + basket.height - 20);
+            ctx.lineTo(basket.x + basket.width - 10, basket.y + basket.height - 20);
+            ctx.stroke();
+            
+            // 籃子把手
+            ctx.strokeStyle = '#5D4037';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.arc(basket.x + basket.width/2, basket.y - 10, 25, Math.PI, 0);
+            ctx.stroke();
+        }
+        
+        // 繪製水果
+        function drawFruit(fruit) {
+            // 水果主體
+            ctx.fillStyle = fruit.color;
+            ctx.beginPath();
+            ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 水果高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.arc(fruit.x - fruit.radius/3, fruit.y - fruit.radius/3, fruit.radius/4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 炸彈的特殊標記
+            if (fruit.isBomb) {
+                // 炸彈引信
+                ctx.fillStyle = '#FF5722';
+                ctx.fillRect(fruit.x + fruit.radius/2, fruit.y - fruit.radius, 5, 15);
+                
+                // 火花
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(fruit.x + fruit.radius/2 + 2, fruit.y - fruit.radius - 5, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 水果陰影
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 5;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            
+            // 重置陰影
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        }
+        
+        // 生成新水果
+        function generateFruit() {
+            // 隨機決定是否生成水果（隨著等級提高，生成頻率增加）
+            const spawnChance = Math.min(0.05 + level * 0.004, 0.15);
+            if (Math.random() < spawnChance) {
+                let typeIndex;
+                
+                // 炸彈機率：15%
+                // 普通水果機率：85%
+                const rand = Math.random();
+                
+                if (rand < 0.15) {
+                    // 15%機率生成炸彈
+                    typeIndex = 4; // 炸彈的索引
+                } else {
+                    // 85%機率生成普通水果
+                    typeIndex = Math.floor(Math.random() * 4); // 0-3，四種水果
+                }
+                
+                const fruitType = fruitTypes[typeIndex];
+                
+                const fruit = {
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: -30,
+                    radius: fruitType.radius,
+                    color: fruitType.color,
+                    score: fruitType.score,
+                    speed: 2 + level * 0.5,
+                    isBomb: fruitType.isBomb || false,
+                    name: fruitType.name
+                };
+                
+                fruits.push(fruit);
+            }
+        }
+        
+        // 更新水果位置
+        function updateFruits() {
+            for (let i = fruits.length - 1; i >= 0; i--) {
+                const fruit = fruits[i];
+                fruit.y += fruit.speed;
+                
+                // 檢查水果是否被籃子接住
+                if (
+                    fruit.y + fruit.radius > basket.y &&
+                    fruit.x > basket.x &&
+                    fruit.x < basket.x + basket.width
+                ) {
+                    // 接到水果
+                    if (fruit.isBomb) {
+                        // 接到炸彈 - 扣生命
+                        lives--;
+                        
+                        // 生命值為0時遊戲結束
+                        if (lives <= 0) {
+                            endGame();
+                        }
+                    } else {
+                        // 接到普通水果 - 增加分數
+                        score += fruit.score;
+                        
+                        // 每100分升一級
+                        level = Math.floor(score / 100) + 1;
+                    }
+                    
+                    // 移除水果
+                    fruits.splice(i, 1);
+                    updateUI();
+                    updateLifeIcons();
+                    
+                    continue;
+                }
+                
+                // 檢查水果是否落地
+                // 水果落地不會扣生命
+                if (fruit.y > canvas.height + 50) {
+                    fruits.splice(i, 1);
+                }
+            }
+        }
+        
+        // 繪製所有遊戲元素
+        function draw() {
+            // 清除畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製背景
+            drawBackground();
+            
+            // 繪製水果
+            fruits.forEach(fruit => drawFruit(fruit));
+            
+            // 繪製籃子
+            drawBasket();
+            
+            // 繪製遊戲信息
+            drawGameInfo();
+        }
+        
+        // 繪製背景
+        function drawBackground() {
+            // 天空
+            ctx.fillStyle = '#E8F5E9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 雲朵
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 3; i++) {
+                const cloudX = (Date.now() / 5000 + i * 1.5) % (canvas.width + 200) - 100;
+                const cloudY = 50 + i * 60;
+                drawCloud(cloudX, cloudY, 60 + i * 10);
+            }
+            
+            // 地面
+            ctx.fillStyle = '#8BC34A';
+            ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+            
+            // 草地紋理
+            ctx.fillStyle = '#7CB342';
+            for (let i = 0; i < canvas.width; i += 10) {
+                ctx.fillRect(i, canvas.height - 20, 5, 5);
+            }
+        }
+        
+        // 繪製雲朵
+        function drawCloud(x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.3, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.6, y, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x - size * 0.3, y + size * 0.1, size * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 繪製遊戲信息
+        function drawGameInfo() {
+            // 分數顯示
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`分數: ${score}`, 20, 40);
+            
+            // 生命顯示
+            ctx.fillText(`生命: ${lives}`, 20, 80);
+            
+            // 關卡顯示
+            ctx.fillText(`關卡: ${level}`, 20, 120);
+            
+            // 規則提示
+            ctx.font = '14px Arial';
+            ctx.fillText('規則: 只有炸彈扣生命，水果落地不扣生命', 20, canvas.height - 40);
+            
+            // 如果遊戲暫停，顯示暫停文字
+            if (gamePaused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.font = 'bold 60px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('遊戲暫停', canvas.width / 2, canvas.height / 2);
+            }
+        }
+        
+        // 更新籃子位置
+        function updateBasket() {
+            // 鍵盤控制
+            if (basket.movingLeft && basket.x > 0) {
+                basket.x -= basket.speed;
+            }
+            if (basket.movingRight && basket.x + basket.width < canvas.width) {
+                basket.x += basket.speed;
+            }
+        }
+        
+        // 遊戲主循環
+        function gameUpdate() {
+            if (!gameRunning || gamePaused) return;
+            
+            updateBasket();
+            generateFruit();
+            updateFruits();
+            draw();
+        }
+        
+        // 更新UI顯示
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('level').textContent = level;
+        }
+        
+        // 結束遊戲
+        function endGame() {
+            gameRunning = false;
+            clearInterval(gameLoop);
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+        
+        // 事件監聽器
+        function setupEventListeners() {
+            // 鍵盤控制
+            document.addEventListener('keydown', (e) => {
+                if (!gameRunning || gamePaused) return;
+                
+                if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a') {
+                    basket.movingLeft = true;
+                }
+                if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd') {
+                    basket.movingRight = true;
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a') {
+                    basket.movingLeft = false;
+                }
+                if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd') {
+                    basket.movingRight = false;
+                }
+            });
+            
+            // 滑鼠控制
+            canvas.addEventListener('mousemove', (e) => {
+                if (!gameRunning || gamePaused) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                
+                basket.x = mouseX - basket.width / 2;
+                
+                // 確保籃子不會移出畫布
+                if (basket.x < 0) basket.x = 0;
+                if (basket.x + basket.width > canvas.width) {
+                    basket.x = canvas.width - basket.width;
+                }
+            });
+            
+            // 觸控控制（移動設備）
+            canvas.addEventListener('touchmove', (e) => {
+                if (!gameRunning || gamePaused) return;
+                
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                
+                basket.x = touchX - basket.width / 2;
+                
+                // 確保籃子不會移出畫布
+                if (basket.x < 0) basket.x = 0;
+                if (basket.x + basket.width > canvas.width) {
+                    basket.x = canvas.width - basket.width;
+                }
+            }, { passive: false });
+            
+            // 按鈕事件
+            document.getElementById('startBtn').addEventListener('click', () => {
+                if (!gameRunning) {
+                    initGame();
+                    gameRunning = true;
+                    gamePaused = false;
+                    gameLoop = setInterval(gameUpdate, 1000 / 60); // 60 FPS
+                    document.getElementById('startBtn').textContent = '遊戲中...';
+                    document.getElementById('startBtn').disabled = true;
+                }
+            });
+            
+            document.getElementById('pauseBtn').addEventListener('click', () => {
+                if (gameRunning) {
+                    gamePaused = !gamePaused;
+                    document.getElementById('pauseBtn').textContent = 
+                        gamePaused ? '繼續遊戲' : '暫停';
+                }
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                initGame();
+                gameRunning = false;
+                gamePaused = false;
+                clearInterval(gameLoop);
+                draw();
+                document.getElementById('startBtn').textContent = '開始遊戲';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').textContent = '暫停';
+            });
+            
+            document.getElementById('restartBtn').addEventListener('click', () => {
+                initGame();
+                gameRunning = true;
+                gamePaused = false;
+                gameLoop = setInterval(gameUpdate, 1000 / 60);
+                document.getElementById('startBtn').textContent = '遊戲中...';
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').textContent = '暫停';
+            });
+            
+            // 窗口大小調整
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                basket.y = canvas.height - 80;
+                draw();
+            });
+        }
+        
+        // 初始化遊戲
+        window.onload = function() {
+            initGame();
+            setupEventListeners();
+        };
+    </script>
+</body>
+</html>
