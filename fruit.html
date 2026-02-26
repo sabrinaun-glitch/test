@@ -43,6 +43,16 @@
             margin-bottom: 5px;
         }
         
+        .game-container-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         .game-container {
             position: relative;
             width: 800px;
@@ -54,6 +64,62 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             border: 10px solid #5D4037;
+        }
+
+        .right-controls {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-buttons button {
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-width: 100px;
+        }
+
+        .control-buttons button:hover {
+            background-color: #45a049;
+        }
+
+        .control-keys {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .key {
+            padding: 5px 10px;
+            background-color: #FF9800;
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .control-hint {
+            font-size: 12px;
+            color: #5D4037;
+            text-align: right;
+            margin-top: 5px;
+            max-width: 150px;
         }
         
         #gameCanvas {
@@ -295,7 +361,94 @@
             background-color: #F44336;
             opacity: 0.5;
         }
-        
+
+        /* 能力圖標樣式 */
+        .powerup-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .powerup-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .powerup-icon.active {
+            animation: pulse 1s infinite;
+            border: 2px solid white;
+        }
+
+        .powerup-icon.inactive {
+            opacity: 0.5;
+            filter: grayscale(70%);
+        }
+
+        .powerup-timer {
+            position: absolute;
+            bottom: -5px;
+            font-size: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* 能力顏色 */
+        .powerup-size { background-color: #9C27B0; } /* 紫色 - 籃子變大 */
+        .powerup-double { background-color: #FF9800; } /* 橙色 - 分數加倍 */
+        .powerup-slow { background-color: #2196F3; } /* 藍色 - 慢動作 */
+        .powerup-shield { background-color: #4CAF50; } /* 綠色 - 防護罩 */
+
+        /* 遊戲模式選擇 */
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            background-color: #FFD166;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #5D4037;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 0 #FFB300;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background-color: #FF6B6B;
+            color: white;
+            box-shadow: 0 3px 0 #FF5252;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.2rem;
@@ -314,6 +467,12 @@
             .score-value, .lives-value, .level-value {
                 font-size: 2rem;
             }
+
+            .powerup-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -330,6 +489,26 @@
                 align-items: center;
                 gap: 10px;
             }
+
+            .powerup-container {
+                gap: 10px;
+            }
+
+            .powerup-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .mode-btn {
+                width: 100%;
+                max-width: 200px;
+            }
         }
     </style>
 </head>
@@ -339,84 +518,119 @@
         <p class="subtitle">生命只有三次，碰到炸彈扣一個生命！</p>
     </header>
     
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-over" id="gameOverScreen">
-            <h2>遊戲結束!</h2>
-            <p>得分: <span id="finalScore">0</span></p>
-            <button id="restartBtn">再玩一次</button>
-        </div>
-    </div>
-    
-    <div class="game-ui">
-        <div class="score-container">
-            <h3>分數</h3>
-            <div class="score-value" id="score">0</div>
-        </div>
-        <div class="lives-container">
-            <h3>生命</h3>
-            <div class="lives-value" id="lives">3</div>
-            <div class="life-icons" id="lifeIcons">
-                <div class="life-icon">❤</div>
-                <div class="life-icon">❤</div>
-                <div class="life-icon">❤</div>
+    <div class="game-container-wrapper">
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="game-over" id="gameOverScreen">
+                <h2 id="gameOverMessage">遊戲結束!</h2>
+                <p>得分: <span id="finalScore">0</span></p>
+                <button id="restartBtn">再玩一次</button>
+            </div>
+            
+            <!-- 控制按鈕（放在遊戲畫布右側） -->
+            <div class="right-controls">
+                <div class="control-buttons">
+                    <button id="startBtn">開始遊戲</button>
+                    <button id="pauseBtn">暫停</button>
+                    <button id="resetBtn">重新開始</button>
+                </div>
+                <div class="control-keys">
+                    <button class="key-btn left-btn" id="leftBtn">← 左移</button>
+                    <button class="key-btn right-btn" id="rightBtn">→ 右移</button>
+                </div>
+                <p class="control-hint">使用滑鼠移動籃子 或 使用左右方向鍵控制</p>
             </div>
         </div>
-        <div class="level-container">
-            <h3>關卡</h3>
-            <div class="level-value" id="level">1</div>
-        </div>
-    </div>
-    
-    <div class="controls">
-        <h3>遊戲控制</h3>
-        <p>使用滑鼠移動籃子 或 使用左右方向鍵控制</p>
-        <div class="control-keys">
-            <div class="key">← 左移</div>
-            <div class="key">→ 右移</div>
-        </div>
         
-        <div class="buttons">
-            <button id="startBtn">開始遊戲</button>
-            <button id="pauseBtn">暫停</button>
-            <button id="resetBtn">重新開始</button>
+        <div class="game-ui">
+            <div class="score-container">
+                <h3>分數</h3>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="lives-container">
+                <h3>生命</h3>
+                <div class="lives-value" id="lives">3</div>
+                <div class="life-icons" id="lifeIcons">
+                    <div class="life-icon">❤</div>
+                    <div class="life-icon">❤</div>
+                    <div class="life-icon">❤</div>
+                </div>
+            </div>
+            <div class="level-container">
+                <h3>關卡</h3>
+                <div class="level-value" id="level">1</div>
+            </div>
         </div>
     </div>
     
+    <!-- 遊戲模式選擇 -->
+    <div class="mode-selector">
+        <button class="mode-btn active" id="modeTimed" onclick="setGameMode('timed')">限時30秒 (1生命)</button>
+        <button class="mode-btn" id="modeUnlimited" onclick="setGameMode('unlimited')">無時間限制 (3生命)</button>
+    </div>
+    
+    <!-- 能力顯示 -->
+    <div class="powerup-container" id="powerupContainer">
+        <div class="powerup-icon powerup-size inactive" id="powerupSize" title="籃子變大">
+            ⬢
+            <div class="powerup-timer" id="powerupSizeTimer"></div>
+        </div>
+        <div class="powerup-icon powerup-double inactive" id="powerupDouble" title="分數加倍">
+            ✕2
+            <div class="powerup-timer" id="powerupDoubleTimer"></div>
+        </div>
+        <div class="powerup-icon powerup-shield inactive" id="powerupShield" title="防護罩">
+            ⛨
+            <div class="powerup-timer" id="powerupShieldTimer"></div>
+        </div>
+    </div>
+    
+    <!-- 遊戲說明 -->
     <div class="instructions">
         <h3>遊戲說明</h3>
         <ul>
+            <li><strong>兩個遊戲模式：</strong></li>
+            <li>1. <strong>限時30秒模式</strong>：只有1個生命，有3種能力系統</li>
+            <li>2. <strong>無時間限制模式</strong>：有3個生命，沒有能力系統</li>
+            <li></li>
+            <li><strong>基本規則：</strong></li>
             <li>移動籃子接住從天而降的水果，獲得高分</li>
             <li>不同水果有不同的分數：蘋果(10分)、香蕉(15分)、橙子(20分)、西瓜(25分)</li>
             <li>只有碰到炸彈才會扣生命，水果落地不會扣生命</li>
-            <li>生命只有三次機會，每碰一次炸彈扣一個生命</li>
-            <li>三個生命都用完時遊戲結束</li>
+            <li>每碰一次炸彈扣一個生命，生命用完時遊戲結束</li>
             <li>每獲得100分進入下一關，水果下落速度會增加</li>
+            <li></li>
+            <li><strong>限時模式專有能力系統：</strong></li>
+            <li>⬢ <strong>籃子變大</strong>：籃子寬度增加50%，持續10秒</li>
+            <li>✕2 <strong>分數加倍</strong>：獲得的分數加倍，持續15秒</li>
+            <li>⛨ <strong>防護罩</strong>：免疫炸彈傷害，持續3秒</li>
+            <li>能力水果會隨機掉落，接住即可激活能力</li>
         </ul>
         
         <div class="fruit-types">
             <div class="fruit-item">
                 <div class="fruit-icon apple"></div>
-                <span>蘋果: 10分</span>
+                <span>蘋果 (10分)</span>
             </div>
             <div class="fruit-item">
                 <div class="fruit-icon banana"></div>
-                <span>香蕉: 15分</span>
+                <span>香蕉 (15分)</span>
             </div>
             <div class="fruit-item">
                 <div class="fruit-icon orange"></div>
-                <span>橙子: 20分</span>
+                <span>橙子 (20分)</span>
             </div>
             <div class="fruit-item">
                 <div class="fruit-icon watermelon"></div>
-                <span>西瓜: 25分</span>
+                <span>西瓜 (25分)</span>
             </div>
             <div class="fruit-item">
-                <div class="fruit-icon bomb">💣</div>
-                <span>炸彈: 扣1生命</span>
+                <div class="fruit-icon bomb"></div>
+                <span>炸彈 (扣1生命)</span>
             </div>
         </div>
     </div>
+
 
     <script>
         // 獲取Canvas元素和上下文
@@ -458,17 +672,54 @@
         
         // 水果陣列
         let fruits = [];
+
+        // 能力系統變數（3種能力，刪除慢動作）
+        let powerups = {
+            size: { active: false, duration: 0, maxDuration: 10 }, // 籃子變大
+            double: { active: false, duration: 0, maxDuration: 15 }, // 分數加倍
+            shield: { active: false, duration: 0, maxDuration: 3 } // 防護罩（3秒）
+        };
+
+        // 遊戲模式變數
+        let gameMode = 'timed'; // 'timed': 30秒限時模式（1生命）, 'unlimited': 無時間限制模式（3生命）
+        let timeLeft = 30; // 限時模式剩餘時間（30秒）
+        let gameTime = 0; // 遊戲時間
+
+        // 能力類型定義（3種能力，刪除慢動作）
+        const powerupTypes = [
+            { name: 'size', color: '#9C27B0', symbol: '⬢', chance: 0.04 },
+            { name: 'double', color: '#FF9800', symbol: '✕2', chance: 0.04 },
+            { name: 'shield', color: '#4CAF50', symbol: '⛨', chance: 0.04 }
+        ];
         
         // 初始化遊戲
         function initGame() {
             score = 0;
-            lives = 3;
+            // 根據遊戲模式設置生命值
+            if (gameMode === 'timed') {
+                lives = 1; // 限時模式：1個生命
+            } else {
+                lives = 3; // 無時間限制模式：3個生命
+            }
             level = 1;
             fruits = [];
             basket.x = canvas.width / 2 - 50;
+            basket.width = 100; // 重置籃子大小
+            basket.speed = 10; // 重置籃子速度
+            
+            // 重置能力
+            for (let key in powerups) {
+                powerups[key].active = false;
+                powerups[key].duration = 0;
+            }
+            
+            // 重置遊戲模式變數
+            timeLeft = 30;
+            gameTime = 0;
             
             updateUI();
             updateLifeIcons();
+            updatePowerupDisplay();
             
             // 隱藏遊戲結束畫面
             document.getElementById('gameOverScreen').style.display = 'none';
@@ -477,6 +728,136 @@
             draw();
         }
         
+        // 更新能力顯示
+        function updatePowerupDisplay() {
+            for (let key in powerups) {
+                const element = document.getElementById(`powerup${key.charAt(0).toUpperCase() + key.slice(1)}`);
+                const timerElement = document.getElementById(`powerup${key.charAt(0).toUpperCase() + key.slice(1)}Timer`);
+                
+                if (powerups[key].active) {
+                    element.classList.remove('inactive');
+                    element.classList.add('active');
+                    timerElement.textContent = Math.ceil(powerups[key].duration);
+                } else {
+                    element.classList.remove('active');
+                    element.classList.add('inactive');
+                    timerElement.textContent = '';
+                }
+            }
+        }
+
+        // 激活能力
+        function activatePowerup(type) {
+            powerups[type].active = true;
+            powerups[type].duration = powerups[type].maxDuration;
+            
+            // 應用能力效果
+            switch(type) {
+                case 'size':
+                    basket.width = 150; // 增加50%
+                    break;
+                case 'double':
+                    // 分數加倍在得分時處理
+                    break;
+                case 'shield':
+                    // 防護罩在碰撞檢測時處理
+                    break;
+            }
+            
+            updatePowerupDisplay();
+        }
+
+        // 更新能力持續時間
+        function updatePowerups() {
+            let anyActive = false;
+            
+            for (let key in powerups) {
+                if (powerups[key].active) {
+                    powerups[key].duration -= 1/60; // 假設60FPS
+                    
+                    if (powerups[key].duration <= 0) {
+                        powerups[key].active = false;
+                        powerups[key].duration = 0;
+                        
+                        // 移除能力效果
+                        switch(key) {
+                            case 'size':
+                                basket.width = 100; // 恢復原始大小
+                                break;
+                            case 'double':
+                                // 無需特別處理
+                                break;
+                            case 'shield':
+                                // 無需特別處理
+                                break;
+                        }
+                    } else {
+                        anyActive = true;
+                    }
+                }
+            }
+            
+            if (anyActive) {
+                updatePowerupDisplay();
+            }
+        }
+
+        // 生成能力水果（只在限時模式生成）
+        function generatePowerup() {
+            // 只在限時模式生成能力水果
+            if (gameMode === 'timed') {
+                // 3%機率生成能力水果（一開始不要太多能力）
+                if (Math.random() < 0.03) {
+                    const powerupType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                    
+                    // 避免在右側控制按鈕區域生成能力水果（右側150像素）
+                    const buttonAreaWidth = 150;
+                    const maxX = canvas.width - buttonAreaWidth - 40;
+                    
+                    const powerup = {
+                        x: Math.random() * maxX + 20,
+                        y: -30,
+                        radius: 20,
+                        color: powerupType.color,
+                        symbol: powerupType.symbol,
+                        type: powerupType.name,
+                        speed: 2 + level * 0.5,
+                        isPowerup: true
+                    };
+                    
+                    fruits.push(powerup);
+                }
+            }
+        }
+
+        // 繪製能力水果
+        function drawPowerup(powerup) {
+            // 能力水果主體
+            ctx.fillStyle = powerup.color;
+            ctx.beginPath();
+            ctx.arc(powerup.x, powerup.y, powerup.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 能力符號
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(powerup.symbol, powerup.x, powerup.y);
+            
+            // 發光效果
+            ctx.shadowColor = powerup.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // 重置陰影
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        }
+
         // 更新生命圖標
         function updateLifeIcons() {
             const lifeIcons = document.getElementById('lifeIcons');
@@ -490,6 +871,35 @@
             }
         }
         
+        // 設置遊戲模式
+        function setGameMode(mode) {
+            gameMode = mode;
+            
+            // 更新按鈕樣式
+            document.getElementById('modeTimed').classList.remove('active');
+            document.getElementById('modeUnlimited').classList.remove('active');
+            
+            document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}`).classList.add('active');
+            
+            // 顯示/隱藏能力系統（只在限時模式顯示）
+            const powerupContainer = document.getElementById('powerupContainer');
+            if (gameMode === 'timed') {
+                powerupContainer.style.display = 'flex';
+            } else {
+                powerupContainer.style.display = 'none';
+            }
+            
+            // 重置遊戲
+            if (gameRunning) {
+                initGame();
+                gameRunning = false;
+                clearInterval(gameLoop);
+                document.getElementById('startBtn').textContent = '開始遊戲';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').textContent = '暫停';
+            }
+        }
+
         // 繪製籃子
         function drawBasket() {
             // 籃子主體
@@ -517,10 +927,32 @@
             ctx.beginPath();
             ctx.arc(basket.x + basket.width/2, basket.y - 10, 25, Math.PI, 0);
             ctx.stroke();
+
+            // 如果防護罩激活，繪製防護罩效果
+            if (powerups.shield.active) {
+                ctx.strokeStyle = '#4CAF50';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(basket.x + basket.width/2, basket.y + basket.height/2, Math.max(basket.width, basket.height)/2 + 10, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // 防護罩發光效果
+                ctx.shadowColor = '#4CAF50';
+                ctx.shadowBlur = 10;
+                ctx.stroke();
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+            }
         }
         
         // 繪製水果
         function drawFruit(fruit) {
+            // 檢查是否是能力水果
+            if (fruit.isPowerup) {
+                drawPowerup(fruit);
+                return;
+            }
+            
             // 水果主體
             ctx.fillStyle = fruit.color;
             ctx.beginPath();
@@ -562,7 +994,7 @@
         // 生成新水果
         function generateFruit() {
             // 隨機決定是否生成水果（隨著等級提高，生成頻率增加）
-            const spawnChance = Math.min(0.05 + level * 0.004, 0.15);
+            const spawnChance = Math.min(0.03 + level * 0.003, 0.12);
             if (Math.random() < spawnChance) {
                 let typeIndex;
                 
@@ -580,8 +1012,12 @@
                 
                 const fruitType = fruitTypes[typeIndex];
                 
+                // 避免在右側控制按鈕區域生成水果（右側150像素）
+                const buttonAreaWidth = 150;
+                const maxX = canvas.width - buttonAreaWidth - 40;
+                
                 const fruit = {
-                    x: Math.random() * (canvas.width - 40) + 20,
+                    x: Math.random() * maxX + 20,
                     y: -30,
                     radius: fruitType.radius,
                     color: fruitType.color,
@@ -599,6 +1035,8 @@
         function updateFruits() {
             for (let i = fruits.length - 1; i >= 0; i--) {
                 const fruit = fruits[i];
+                
+                // 更新水果位置（不再有慢動作效果）
                 fruit.y += fruit.speed;
                 
                 // 檢查水果是否被籃子接住
@@ -609,16 +1047,30 @@
                 ) {
                     // 接到水果
                     if (fruit.isBomb) {
-                        // 接到炸彈 - 扣生命
-                        lives--;
-                        
-                        // 生命值為0時遊戲結束
-                        if (lives <= 0) {
-                            endGame();
+                        // 檢查防護罩
+                        if (!powerups.shield.active) {
+                            // 接到炸彈 - 扣生命
+                            lives--;
+                            
+                            // 生命值為0時遊戲結束
+                            if (lives <= 0) {
+                                endGame();
+                            }
                         }
+                        // 如果有防護罩，炸彈無效
+                    } else if (fruit.isPowerup) {
+                        // 接到能力水果 - 激活能力
+                        activatePowerup(fruit.type);
                     } else {
                         // 接到普通水果 - 增加分數
-                        score += fruit.score;
+                        let fruitScore = fruit.score;
+                        
+                        // 應用分數加倍效果
+                        if (powerups.double.active) {
+                            fruitScore *= 2;
+                        }
+                        
+                        score += fruitScore;
                         
                         // 每100分升一級
                         level = Math.floor(score / 100) + 1;
@@ -707,6 +1159,15 @@
             // 關卡顯示
             ctx.fillText(`關卡: ${level}`, 20, 120);
             
+            // 遊戲模式顯示
+            let modeText = '';
+            if (gameMode === 'timed') {
+                modeText = `限時模式: ${Math.ceil(timeLeft)}秒 (1生命)`;
+            } else if (gameMode === 'unlimited') {
+                modeText = `無時間限制 (3生命)`;
+            }
+            ctx.fillText(`模式: ${modeText}`, 20, 160);
+            
             // 規則提示
             ctx.font = '14px Arial';
             ctx.fillText('規則: 只有炸彈扣生命，水果落地不扣生命', 20, canvas.height - 40);
@@ -737,7 +1198,27 @@
             
             updateBasket();
             generateFruit();
+            generatePowerup(); // 生成能力水果
             updateFruits();
+            updatePowerups(); // 更新能力持續時間
+            
+            // 更新遊戲模式相關邏輯
+            if (gameMode === 'timed') {
+                // 限時模式：減少剩餘時間
+                timeLeft -= 1/60; // 假設60FPS
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    endGame();
+                }
+            } else if (gameMode === 'unlimited') {
+                // 無時間限制模式：增加遊戲時間，提高難度
+                gameTime += 1/60;
+                // 每30秒增加難度
+                if (gameTime > 30 && level < 10) {
+                    level = Math.min(10, Math.floor(gameTime / 30) + 1);
+                }
+            }
+            
             draw();
         }
         
@@ -754,6 +1235,18 @@
             clearInterval(gameLoop);
             
             document.getElementById('finalScore').textContent = score;
+            
+            // 根據遊戲模式顯示不同訊息
+            let gameOverMessage = '';
+            if (gameMode === 'timed' && timeLeft <= 0) {
+                gameOverMessage = '時間到！';
+            } else if (lives <= 0) {
+                gameOverMessage = '遊戲結束！';
+            } else {
+                gameOverMessage = '遊戲結束！';
+            }
+            
+            document.getElementById('gameOverMessage').textContent = gameOverMessage;
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
         
@@ -842,6 +1335,47 @@
                 document.getElementById('startBtn').textContent = '開始遊戲';
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('pauseBtn').textContent = '暫停';
+            });
+            
+            // 左右鍵按鈕控制
+            document.getElementById('leftBtn').addEventListener('mousedown', () => {
+                if (!gameRunning || gamePaused) return;
+                basket.movingLeft = true;
+            });
+            
+            document.getElementById('leftBtn').addEventListener('mouseup', () => {
+                basket.movingLeft = false;
+            });
+            
+            document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!gameRunning || gamePaused) return;
+                basket.movingLeft = true;
+            });
+            
+            document.getElementById('leftBtn').addEventListener('touchend', (e) => {
+                e.preventDefault();
+                basket.movingLeft = false;
+            });
+            
+            document.getElementById('rightBtn').addEventListener('mousedown', () => {
+                if (!gameRunning || gamePaused) return;
+                basket.movingRight = true;
+            });
+            
+            document.getElementById('rightBtn').addEventListener('mouseup', () => {
+                basket.movingRight = false;
+            });
+            
+            document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!gameRunning || gamePaused) return;
+                basket.movingRight = true;
+            });
+            
+            document.getElementById('rightBtn').addEventListener('touchend', (e) => {
+                e.preventDefault();
+                basket.movingRight = false;
             });
             
             document.getElementById('restartBtn').addEventListener('click', () => {
